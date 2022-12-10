@@ -1,34 +1,36 @@
 // ignore_for_file: avoid_unnecessary_containers, prefer_const_constructors
 
 import 'dart:convert';
-import 'package:flutter_stisla_app/screens/auth/register.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter_stisla_app/network/api_urls.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class AuthScreen extends StatefulWidget {
-  const AuthScreen({super.key});
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
 
   @override
-  State<AuthScreen> createState() => _AuthScreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _AuthScreenState extends State<AuthScreen> {
+class _RegisterScreenState extends State<RegisterScreen> {
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
-  TextEditingController emailController =
-      TextEditingController(text: 'superadmin@gmail.com');
-  TextEditingController passwordController =
-      TextEditingController(text: 'password');
+  TextEditingController nameController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  TextEditingController confirmPasswordController = TextEditingController();
 
-  void login() async {
+  void register() async {
     var headers = {'Content-Type': 'application/json'};
     if (emailController.text == '' || passwordController.text == '') {
       showError('Warning', 'Email dan password harus diisi');
+    } else if (passwordController.text != confirmPasswordController.text) {
+      showError('Warning', 'Konfirmasi password tidak sama!');
     } else {
       try {
-        var url = Uri.parse(ApiUrls().baseUrl + ApiUrls().login);
+        var url = Uri.parse(ApiUrls().baseUrl + ApiUrls().register);
         Map body = {
+          'name': nameController.text,
           'email': emailController.text.trim(),
           'password': passwordController.text,
         };
@@ -43,8 +45,10 @@ class _AuthScreenState extends State<AuthScreen> {
             // final SharedPreferences prefs = await _prefs;
             // await prefs.setString('token', token);
 
+            nameController.clear();
             emailController.clear();
             passwordController.clear();
+            confirmPasswordController.clear();
           } else if (json['code'] == 1) {
             throw jsonDecode(response.body)['errors'];
           }
@@ -102,6 +106,22 @@ class _AuthScreenState extends State<AuthScreen> {
                     height: 20,
                   ),
                   TextField(
+                    controller: nameController,
+                    obscureText: false,
+                    decoration: InputDecoration(
+                        alignLabelWithHint: true,
+                        focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.black)),
+                        fillColor: Colors.white54,
+                        hintText: 'Full Name',
+                        hintStyle: TextStyle(color: Colors.grey),
+                        contentPadding: EdgeInsets.only(bottom: 15),
+                        focusColor: Colors.white60),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  TextField(
                     controller: emailController,
                     obscureText: false,
                     decoration: InputDecoration(
@@ -133,27 +153,21 @@ class _AuthScreenState extends State<AuthScreen> {
                   SizedBox(
                     height: 10,
                   ),
-                  ElevatedButton(
-                      style: ButtonStyle(
-                          shape:
-                              MaterialStateProperty.all<RoundedRectangleBorder>(
-                                  RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                      side: BorderSide.none)),
-                          backgroundColor: MaterialStateProperty.all<Color>(
-                            Colors.pinkAccent,
-                          )),
-                      onPressed: () {
-                        login();
-                      },
-                      child: Text('Login',
-                          style: const TextStyle(
-                            fontSize: 24,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ))),
+                  TextField(
+                    controller: confirmPasswordController,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                        alignLabelWithHint: true,
+                        focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.black)),
+                        fillColor: Colors.white54,
+                        hintText: 'Konfirmasi Password',
+                        hintStyle: TextStyle(color: Colors.grey),
+                        contentPadding: EdgeInsets.only(bottom: 15),
+                        focusColor: Colors.white60),
+                  ),
                   SizedBox(
-                    height: 20,
+                    height: 10,
                   ),
                   ElevatedButton(
                       style: ButtonStyle(
@@ -166,10 +180,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             Colors.pinkAccent,
                           )),
                       onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const RegisterScreen()));
+                        register();
                       },
                       child: Text('Register',
                           style: const TextStyle(
