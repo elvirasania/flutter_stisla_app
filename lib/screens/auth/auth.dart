@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 import 'package:flutter_stisla_app/screens/auth/register.dart';
+import 'package:flutter_stisla_app/screens/home/home_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter_stisla_app/network/api_urls.dart';
@@ -39,12 +40,17 @@ class _AuthScreenState extends State<AuthScreen> {
         if (response.statusCode == 200) {
           final json = jsonDecode(response.body);
           if (json['token'] != null) {
-            // var token = json['token'];
-            // final SharedPreferences prefs = await _prefs;
-            // await prefs.setString('token', token);
+            var token = json['token'];
+            final SharedPreferences prefs = await _prefs;
+            await prefs.setString('token', token);
 
             emailController.clear();
             passwordController.clear();
+            // ignore: use_build_context_synchronously
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (BuildContext context) => const HomeScreen()));
           } else if (json['code'] == 1) {
             throw jsonDecode(response.body)['errors'];
           }
