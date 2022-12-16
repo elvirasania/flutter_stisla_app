@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_stisla_app/models/category_model.dart';
 import 'package:flutter_stisla_app/network/api_urls.dart';
 import 'package:flutter_stisla_app/screens/auth/auth.dart';
 import 'package:flutter_stisla_app/screens/partials/colours.dart';
@@ -16,6 +17,35 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+
+  var categoryList = <Category>[];
+
+  Future<List<Category>?> getList() async {
+    final prefs = await _prefs;
+    var token = prefs.getString('token');
+    var headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': 'Bearer $token'
+    };
+    try {
+      var url = Uri.parse(ApiUrls().baseUrl + ApiUrls().category);
+
+      final response = await http.get(url, headers: headers);
+
+      print(response.statusCode);
+      print(categoryList.length);
+      print(jsonDecode(response.body));
+
+      if (response.statusCode == 200) {
+        var jsonString = response.body;
+        return categoryFromJson(jsonString);
+      }
+    } catch (error) {
+      print('Testing');
+    }
+    return null;
+  }
 
   void logout() async {
     var prefs = await _prefs;
@@ -73,7 +103,50 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Padding(
           padding: const EdgeInsets.only(left: 25, right: 25),
           child: Column(
-            children: [],
+            children: [
+              const SizedBox(
+                height: 10,
+              ),
+              const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'List Kategori',
+                    style: TextStyle(fontSize: 16),
+                  )),
+              const SizedBox(
+                height: 10,
+              ),
+              FutureBuilder<List<Category>?>(
+                future: getList(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return ListView.builder(
+                      padding: const EdgeInsets.all(0),
+                      shrinkWrap: true,
+                      itemCount: snapshot.data!.length,
+                      itemBuilder: (context, index) {
+                        return Card(
+                          child: ListTile(
+                            title: Text(snapshot.data![index].name),
+                            trailing: IconButton(
+                              onPressed: () {
+                                print('Edit');
+                              },
+                              icon: const Icon(
+                                Icons.settings,
+                                color: primary,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  } else {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                },
+              ),
+            ],
           ),
         ),
       ),
