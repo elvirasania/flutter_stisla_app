@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_stisla_app/models/category_model.dart';
 import 'package:flutter_stisla_app/network/api_urls.dart';
 import 'package:flutter_stisla_app/screens/auth/auth.dart';
+import 'package:flutter_stisla_app/screens/category/add_screen.dart';
 import 'package:flutter_stisla_app/screens/partials/colours.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -84,6 +85,16 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: primary,
+        onPressed: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (BuildContext context) => const AddScreen()));
+        },
+        child: const Icon(Icons.add),
+      ),
       appBar: AppBar(
         title: const Text('UAS MOBILE '),
         backgroundColor: primary,
