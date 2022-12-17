@@ -71,6 +71,38 @@ class _EditScreenState extends State<EditScreen> {
     }
   }
 
+  void deleteData(id) async {
+    var prefs = await _prefs;
+    var token = prefs.getString('token');
+    var headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': 'Bearer $token'
+    };
+    if (nameController.text == '') {
+      showError('Warning', 'Name harus diisi');
+    } else {
+      try {
+        var url = Uri.parse('${ApiUrls().baseUrl}${ApiUrls().category}/$id');
+        final response = await http.delete(url, headers: headers);
+
+        print(response.statusCode);
+        if (response.statusCode == 204) {
+          nameController.clear();
+          // ignore: use_build_context_synchronously
+          Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (BuildContext context) => const HomeScreen()));
+        } else {
+          throw jsonDecode(response.body)["errors"] ?? "Unknown Error Occured";
+        }
+      } catch (error) {
+        showError('Error', error.toString());
+      }
+    }
+  }
+
   void showError(title, error) {
     showDialog(
         context: context,
@@ -132,24 +164,52 @@ class _EditScreenState extends State<EditScreen> {
               const SizedBox(
                 height: 10,
               ),
-              ElevatedButton(
-                  style: ButtonStyle(
-                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                          RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              side: BorderSide.none)),
-                      backgroundColor: MaterialStateProperty.all<Color>(
-                        Colors.pinkAccent,
-                      )),
-                  onPressed: () {
-                    editData(widget.id);
-                  },
-                  child: const Text('Edit',
-                      style: TextStyle(
-                        fontSize: 24,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ))),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                        style: ButtonStyle(
+                            shape: MaterialStateProperty.all<
+                                    RoundedRectangleBorder>(
+                                RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    side: BorderSide.none)),
+                            backgroundColor: MaterialStateProperty.all<Color>(
+                              Colors.pinkAccent,
+                            )),
+                        onPressed: () {
+                          editData(widget.id);
+                        },
+                        child: const Text('Edit',
+                            style: TextStyle(
+                              fontSize: 24,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ))),
+                  ),
+                  Expanded(
+                    child: ElevatedButton(
+                        style: ButtonStyle(
+                            shape: MaterialStateProperty.all<
+                                    RoundedRectangleBorder>(
+                                RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    side: BorderSide.none)),
+                            backgroundColor: MaterialStateProperty.all<Color>(
+                              Colors.pinkAccent,
+                            )),
+                        onPressed: () {
+                          deleteData(widget.id);
+                        },
+                        child: const Text('Delete',
+                            style: TextStyle(
+                              fontSize: 24,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ))),
+                  ),
+                ],
+              ),
               const SizedBox(
                 height: 20,
               ),
