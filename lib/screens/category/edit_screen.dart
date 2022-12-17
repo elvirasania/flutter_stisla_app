@@ -8,18 +8,34 @@ import 'package:flutter/material.dart';
 import 'package:flutter_stisla_app/screens/home/home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class AddScreen extends StatefulWidget {
-  const AddScreen({super.key});
+class EditScreen extends StatefulWidget {
+  final int id;
+  final String category;
+  const EditScreen({super.key, required this.id, required this.category});
 
   @override
-  State<AddScreen> createState() => _AddScreenState();
+  State<EditScreen> createState() => _EditScreenState();
 }
 
-class _AddScreenState extends State<AddScreen> {
+class _EditScreenState extends State<EditScreen> {
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   TextEditingController nameController = TextEditingController();
 
-  void addData() async {
+  @override
+  void initState() {
+    setState(() {
+      nameController.text = widget.category;
+    });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    super.dispose();
+  }
+
+  void editData(id) async {
     var prefs = await _prefs;
     var token = prefs.getString('token');
     var headers = {
@@ -31,15 +47,15 @@ class _AddScreenState extends State<AddScreen> {
       showError('Warning', 'Name harus diisi');
     } else {
       try {
-        var url = Uri.parse(ApiUrls().baseUrl + ApiUrls().category);
+        var url = Uri.parse('${ApiUrls().baseUrl}${ApiUrls().category}/$id');
         Map body = {
           'name': nameController.text.trim(),
         };
         final response =
-            await http.post(url, body: jsonEncode(body), headers: headers);
+            await http.put(url, body: jsonEncode(body), headers: headers);
 
         print(response.statusCode);
-        if (response.statusCode == 201) {
+        if (response.statusCode == 200) {
           nameController.clear();
           // ignore: use_build_context_synchronously
           Navigator.pushReplacement(
@@ -76,7 +92,7 @@ class _AddScreenState extends State<AddScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Data'),
+        title: const Text('Edit Data'),
         backgroundColor: primary,
       ),
       body: SingleChildScrollView(
@@ -90,7 +106,7 @@ class _AddScreenState extends State<AddScreen> {
               Container(
                 padding: const EdgeInsets.all(0),
                 child: const Text(
-                  'Tambah Kategori',
+                  'Edit Kategori',
                   style: TextStyle(
                       fontSize: 30,
                       color: Colors.black,
@@ -126,9 +142,9 @@ class _AddScreenState extends State<AddScreen> {
                         Colors.pinkAccent,
                       )),
                   onPressed: () {
-                    addData();
+                    editData(widget.id);
                   },
-                  child: const Text('Tambah',
+                  child: const Text('Edit',
                       style: TextStyle(
                         fontSize: 24,
                         color: Colors.white,

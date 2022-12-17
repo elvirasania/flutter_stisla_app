@@ -5,6 +5,7 @@ import 'package:flutter_stisla_app/models/category_model.dart';
 import 'package:flutter_stisla_app/network/api_urls.dart';
 import 'package:flutter_stisla_app/screens/auth/auth.dart';
 import 'package:flutter_stisla_app/screens/category/add_screen.dart';
+import 'package:flutter_stisla_app/screens/category/edit_screen.dart';
 import 'package:flutter_stisla_app/screens/partials/colours.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -142,6 +143,15 @@ class _HomeScreenState extends State<HomeScreen> {
                             trailing: IconButton(
                               onPressed: () {
                                 print('Edit');
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (BuildContext context) =>
+                                            EditScreen(
+                                              id: snapshot.data![index].id,
+                                              category:
+                                                  snapshot.data![index].name,
+                                            )));
                               },
                               icon: const Icon(
                                 Icons.settings,
